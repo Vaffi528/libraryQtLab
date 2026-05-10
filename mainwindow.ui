@@ -30,7 +30,7 @@
        <enum>QTabWidget::TabShape::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <property name="elideMode">
        <enum>Qt::TextElideMode::ElideRight</enum>
@@ -50,17 +50,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QTableWidget" name="authorsTableWidget">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
+         <widget class="QTableView" name="authorsTableView"/>
         </item>
        </layout>
       </widget>
@@ -76,17 +66,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTableWidget" name="booksTableWidget">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
+         <widget class="QTableView" name="booksTableView"/>
         </item>
        </layout>
       </widget>
@@ -102,17 +82,7 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QTableWidget" name="genresTableWidget">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-         </widget>
+         <widget class="QTableView" name="genresTableView"/>
         </item>
        </layout>
       </widget>

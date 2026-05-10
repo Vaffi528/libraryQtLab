@@ -5,14 +5,11 @@
 
 class AuthorsTab: public AbstractTab {
     public:
-        AuthorsTab(Ui::MainWindow *ui);
-        virtual ~AuthorsTab() override;
-        virtual bool AddRecord() override;
-        virtual bool EditRecord() override;
-        virtual bool RemoveRecord() override;
-
-    private:
-        QTabWidget* tab;
+        AuthorsTab(Ui::MainWindow *ui): AbstractTab(ui) {};
+        virtual ~AuthorsTab() override {};
+        virtual bool AddRecord() override {};
+        virtual bool EditRecord() override {};
+        virtual bool RemoveRecord() override {};
 };
 
 #endif // AUTHORSTAB_H

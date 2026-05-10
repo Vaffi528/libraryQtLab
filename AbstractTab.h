@@ -5,12 +5,16 @@
 
 class AbstractTab {
     public:
-        virtual ~AbstractTab();
+        AbstractTab(Ui::MainWindow *ui): ui(ui) {};
+        virtual ~AbstractTab() {};
 
     public:
-        virtual bool AddRecord();
-        virtual bool EditRecord();
-        virtual bool RemoveRecord();
+        virtual bool AddRecord() = 0;
+        virtual bool EditRecord() = 0;
+        virtual bool RemoveRecord() = 0;
+
+    public:
+        Ui::MainWindow *ui;
 };
 
 #endif // ABSTRACTTAB_H

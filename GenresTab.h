@@ -5,14 +5,12 @@
 
 class GenresTab: public AbstractTab {
     public:
-        GenresTab(Ui::MainWindow *ui);
-        virtual ~GenresTab() override;
-        virtual bool AddRecord() override;
-        virtual bool EditRecord() override;
-        virtual bool RemoveRecord() override;
+        GenresTab(Ui::MainWindow *ui): AbstractTab(ui) {};
+        virtual ~GenresTab() override {};
+        virtual bool AddRecord() override {};
+        virtual bool EditRecord() override {};
+        virtual bool RemoveRecord() override {};
 
-    private:
-        QTabWidget* tab;
 };
 
 #endif // GENRESTAB_H

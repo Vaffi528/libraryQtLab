@@ -5,19 +5,37 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    setAttribute(Qt::WA_DeleteOnClose);
+
     ui->setupUi(this);
     bool isTablesSet = setUpTables();
     if (!isTablesSet)
         return;
 
-    DataBaseManager manager;
-    bool isCreated = manager.createTables();
-    if (!isCreated)
+    manager = new DataBaseManager();
+    bool isTablesCreated = manager->createTables();
+    if (!isTablesCreated)
         return;
 
     bool isModelsSet = setUpModels();
     if (!isModelsSet)
         return;
+
+    setUpTabs();
+    initSubscriptions();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+    delete manager;
+
+    delete authorsTab;
+    delete booksTab;
+    delete genresTab;
+
+    db.close();
+    qDebug() << "БД закрыта успешно!";
 }
 
 bool MainWindow::setUpTables() {
@@ -61,12 +79,51 @@ bool MainWindow::setUpModels() {
     return true;
 }
 
+bool MainWindow::setUpTabs() {
+    authorsTab = new AuthorsTab(ui);
+    booksTab = new BooksTab(ui);
+    genresTab = new GenresTab(ui);
+    currentTab = authorsTab;
 
-MainWindow::~MainWindow()
-{
-    delete ui;
-    db.close();
+    qDebug() << "Вкладки инициализированы успешно!";
+    return true;
 }
+
+void MainWindow::initSubscriptions(){
+    connect(ui->tabs, &QTabWidget::currentChanged, this, &MainWindow::onTabChange);
+
+    connect(ui->addBtn, &QPushButton::clicked, this, &MainWindow::onAddBtnClick);
+    connect(ui->editBtn, &QPushButton::clicked, this, &MainWindow::onEditBtnClick);
+    connect(ui->removeBtn, &QPushButton::clicked, this, &MainWindow::onRemoveBtnClick);
+};
+
+
+void MainWindow::onTabChange() {
+    int currentTabIndex = ui->tabs->currentIndex();
+
+    switch (currentTabIndex) {
+        case 0:
+            currentTab = authorsTab;
+            break;
+        case 1:
+            currentTab = booksTab;
+            break;
+        case 2:
+            currentTab = genresTab;
+            break;
+    }
+
+};
+
+void MainWindow::onAddBtnClick() {
+    currentTab->AddRecord();
+};
+void MainWindow::onEditBtnClick() {
+    currentTab->EditRecord();
+};
+void MainWindow::onRemoveBtnClick() {
+    currentTab->RemoveRecord();
+};
 
 void MainWindow::on_AuthorsTable_customContextMenuRequested(const QPoint &pos)
 {
