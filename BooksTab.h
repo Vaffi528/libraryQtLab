@@ -5,8 +5,8 @@
 
 class BooksTab: public AbstractTab {
     public:
-        BooksTab(Ui::MainWindow *ui): AbstractTab(ui) {};
-        virtual ~BooksTab() override {};
+        BooksTab(QTableView* tab): AbstractTab(tab) {};
+        virtual ~BooksTab() override = default;
         virtual bool AddRecord() override {};
         virtual bool EditRecord() override {};
         virtual bool RemoveRecord() override {};

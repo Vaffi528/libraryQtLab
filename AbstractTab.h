@@ -2,10 +2,12 @@
 #define ABSTRACTTAB_H
 
 #include "ui_mainwindow.h"
+#include "headers.h"
+#include "database.h"
 
-class AbstractTab {
+class AbstractTab: public QDialog {
     public:
-        AbstractTab(Ui::MainWindow *ui): ui(ui) {};
+    AbstractTab(QTableView* tab): tab(tab) {};
         virtual ~AbstractTab() {};
 
     public:
@@ -14,7 +16,7 @@ class AbstractTab {
         virtual bool RemoveRecord() = 0;
 
     public:
-        Ui::MainWindow *ui;
+        QTableView* tab;
 };
 
 #endif // ABSTRACTTAB_H

@@ -22,7 +22,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    bool setUpTables();
+    bool setUpDatabase();
     bool setUpModels();
     bool setUpTabs();
     void initSubscriptions();
@@ -42,8 +42,6 @@ private:
     QSqlTableModel* genresModel;
     QSqlRelationalTableModel* booksModel;
     QSqlRelationalTableModel* bookGenresModel;
-
-    DataBaseManager* manager;
 
     AbstractTab* currentTab;
 

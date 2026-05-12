@@ -11,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     AuthorsTab.cpp \
+    BookDialog.cpp \
     database.cpp \
     main.cpp \
     mainwindow.cpp
@@ -18,7 +19,9 @@ SOURCES += \
 HEADERS += \
     AbstractTab.h \
     AuthorsTab.h \
+    BookDialog.h \
     BooksTab.h \
+    DialogsData.h \
     GenresTab.h \
     database.h \
     headers.h \

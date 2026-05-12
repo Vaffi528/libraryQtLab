@@ -1,5 +1,10 @@
 #include "database.h"
 
+DataBaseManager* DataBaseManager::getInstance(){
+    static DataBaseManager instance;
+    return &instance;
+}
+
 bool DataBaseManager::createTables() {
     QSqlQuery query;
     bool isOk1 = query.exec("CREATE TABLE IF NOT EXISTS authors ("
@@ -31,6 +36,14 @@ bool DataBaseManager::createTables() {
     return true;
 };
 
-//bool DataBaseManager::addAuthor();
-//bool DataBaseManager::addBook();
-//bool DataBaseManager::assignGenreToBook();
+bool DataBaseManager::addAuthor(const AuthorsDialogData* data){
+    QSqlQuery query;
+    query.prepare("INSERT INTO authors(author) VALUES (:name)");
+    query.bindValue(":name", data->name);
+    bool isAdded = query.exec();
+    if (isAdded)
+        return true;
+    return false;
+}
+//bool DataBaseManager::addBook(const BooksDialogData* data);
+//bool DataBaseManager::assignGenreToBook(const GenresDialogData* data);

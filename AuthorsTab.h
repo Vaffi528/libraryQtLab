@@ -5,9 +5,9 @@
 
 class AuthorsTab: public AbstractTab {
     public:
-        AuthorsTab(Ui::MainWindow *ui): AbstractTab(ui) {};
-        virtual ~AuthorsTab() override {};
-        virtual bool AddRecord() override {};
+        AuthorsTab(QTableView* tab): AbstractTab(tab) {};
+        virtual ~AuthorsTab() override = default;
+        virtual bool AddRecord() override;
         virtual bool EditRecord() override {};
         virtual bool RemoveRecord() override {};
 };

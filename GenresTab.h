@@ -5,8 +5,8 @@
 
 class GenresTab: public AbstractTab {
     public:
-        GenresTab(Ui::MainWindow *ui): AbstractTab(ui) {};
-        virtual ~GenresTab() override {};
+        GenresTab(QTableView* tab): AbstractTab(tab) {};
+        virtual ~GenresTab() override = default;
         virtual bool AddRecord() override {};
         virtual bool EditRecord() override {};
         virtual bool RemoveRecord() override {};

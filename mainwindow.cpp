@@ -8,11 +8,11 @@ MainWindow::MainWindow(QWidget *parent)
     setAttribute(Qt::WA_DeleteOnClose);
 
     ui->setupUi(this);
-    bool isTablesSet = setUpTables();
-    if (!isTablesSet)
+    bool isDBSet = setUpDatabase();
+    if (!isDBSet)
         return;
 
-    manager = new DataBaseManager();
+    DataBaseManager* manager = DataBaseManager::getInstance();
     bool isTablesCreated = manager->createTables();
     if (!isTablesCreated)
         return;
@@ -27,18 +27,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete ui;
-    delete manager;
-
-    delete authorsTab;
-    delete booksTab;
-    delete genresTab;
-
     db.close();
+    delete ui;
     qDebug() << "БД закрыта успешно!";
 }
 
-bool MainWindow::setUpTables() {
+bool MainWindow::setUpDatabase() {
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("library.db");
     if (!db.open()) {
@@ -80,9 +74,9 @@ bool MainWindow::setUpModels() {
 }
 
 bool MainWindow::setUpTabs() {
-    authorsTab = new AuthorsTab(ui);
-    booksTab = new BooksTab(ui);
-    genresTab = new GenresTab(ui);
+    authorsTab = new AuthorsTab(ui->authorsTableView);
+    booksTab = new BooksTab(ui->booksTableView);
+    genresTab = new GenresTab(ui->genresTableView);
     currentTab = authorsTab;
 
     qDebug() << "Вкладки инициализированы успешно!";
@@ -116,13 +110,13 @@ void MainWindow::onTabChange() {
 };
 
 void MainWindow::onAddBtnClick() {
-    currentTab->AddRecord();
+    bool isOk = currentTab->AddRecord();
 };
 void MainWindow::onEditBtnClick() {
-    currentTab->EditRecord();
+    bool isOk = currentTab->EditRecord();
 };
 void MainWindow::onRemoveBtnClick() {
-    currentTab->RemoveRecord();
+    return;
 };
 
 void MainWindow::on_AuthorsTable_customContextMenuRequested(const QPoint &pos)
