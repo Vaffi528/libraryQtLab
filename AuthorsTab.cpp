@@ -11,8 +11,8 @@ bool AuthorsTab::AddRecord() {
             qDebug() << "Автор успешно добавлен в БД!";
            return true;
         } else if (DBResponse == Status::INVALID_ARG) {
-            QMessageBox::information(this, "Добавить запись", "Такое имя уже существует!");
-            qDebug() << "Ошибка: было введено уже существующее имя!";
+            QMessageBox::information(this, "Добавить запись", "Такое имя уже существует или поле оказалось пустым!");
+            qDebug() << "Ошибка: было введено уже существующее имя или поле оказалось пустым!";
             return false;
         }
         QMessageBox::information(this, "Добавить запись", "Ошибка базы данных при добавлении автора");
@@ -28,7 +28,7 @@ bool AuthorsTab::EditRecord() {
     QModelIndex selected = tab->currentIndex();
     if (!selected.isValid()){
         QMessageBox::information(this, "Изменить запись", "Выберите запись для изменения");
-        qDebug() << "Ошибка: не была выбрана строка для удаления!";
+        qDebug() << "Ошибка: не была выбрана строка для изменения!";
         return false;
     }
     int row = selected.row();
@@ -55,3 +55,25 @@ bool AuthorsTab::EditRecord() {
     qDebug() << "Отмена диалога при изменении автора";
     return false;
 }
+
+bool AuthorsTab::RemoveRecord() {
+    QModelIndexList selectedItems = tab->selectionModel()->selectedIndexes();
+    for (QModelIndex& selected : selectedItems){
+        int row = selected.row();
+        QModelIndex userId = tab->model()->index(row,0);
+        AuthorsDialogData author {userId.data().toInt(), tab->model()->index(row,0).data().toString()};
+        Status DBResponse = DataBaseManager::getInstance()->removeAuthor(&author);
+        if (DBResponse == Status::DB_QUERY_FAILED) {
+            QMessageBox::information(this, "Удалить запись", "Ошибка базы данных при удалении автора");
+            qDebug() << "Ошибка базы данных при удалении автора!";
+            return false;
+        }
+    }
+    if (selectedItems.isEmpty()) {
+        QMessageBox::information(this, "Удалить запись", "Выберите запись для удаления");
+        qDebug() << "Ошибка: не была выбрана строка для удаления!";
+        return false;
+    }
+    qDebug() << "Авторы успешно удалены из БД!";
+    return true;
+    }

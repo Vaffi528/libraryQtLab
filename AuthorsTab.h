@@ -9,7 +9,7 @@ class AuthorsTab: public AbstractTab {
         virtual ~AuthorsTab() override = default;
         virtual bool AddRecord() override;
         virtual bool EditRecord() override;
-        virtual bool RemoveRecord() override {};
+        virtual bool RemoveRecord() override;
 };
 
 #endif // AUTHORSTAB_H

@@ -37,6 +37,8 @@ Status DataBaseManager::createTables() {
 };
 
 Status DataBaseManager::addAuthor(const AuthorsDialogData* data){
+    if (data->name.isEmpty())
+        return Status::INVALID_ARG;
     QSqlQuery query;
     query.prepare("SELECT id FROM authors WHERE author = :author");
     query.bindValue(":author", data->name);
@@ -69,5 +71,20 @@ Status DataBaseManager::editAuthor(const AuthorsDialogData* data) {
     return Status::DB_QUERY_FAILED;
 }
 
+Status DataBaseManager::removeAuthor(const AuthorsDialogData* data) {
+    QSqlQuery query;
+    query.prepare("SELECT author FROM authors WHERE id = :id");
+    query.bindValue(":id", data->id);
+    query.exec();
+    if (query.next()){
+        query.prepare("DELETE FROM authors WHERE id = :id");
+        query.bindValue(":id", data->id);
+        bool isDeleted = query.exec();
+        if (isDeleted)
+            return Status::SUCCESS;
+        return Status::DB_QUERY_FAILED;
+    }
+    return Status::DB_QUERY_FAILED;
+}
 //Status DataBaseManager::addBook(const BooksDialogData* data);
 //Status DataBaseManager::assignGenreToBook(const GenresDialogData* data);

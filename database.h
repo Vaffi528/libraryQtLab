@@ -19,6 +19,9 @@ class DataBaseManager {
         Status editAuthor(const AuthorsDialogData* data);
         Status editBook(/* const BooksDialogData* data */);
 
+        Status removeAuthor(const AuthorsDialogData* data);
+        Status removeBook(/* const BooksDialogData* data */);
+
     private:
         DataBaseManager() = default;
         DataBaseManager(const DataBaseManager&) = delete;
