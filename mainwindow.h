@@ -44,6 +44,7 @@ private:
     QSqlRelationalTableModel* bookGenresModel;
 
     AbstractTab* currentTab;
+    QSqlTableModel* currentModel;
 
     AuthorsTab* authorsTab;
     BooksTab* booksTab;

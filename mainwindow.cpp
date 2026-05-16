@@ -13,8 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
         return;
 
     DataBaseManager* manager = DataBaseManager::getInstance();
-    bool isTablesCreated = manager->createTables();
-    if (!isTablesCreated)
+    Status isTablesCreated = manager->createTables();
+    if (isTablesCreated == Status::DB_SETUP_FAILED)
         return;
 
     bool isModelsSet = setUpModels();
@@ -48,22 +48,26 @@ bool MainWindow::setUpModels() {
     authorsModel->setTable("authors");
     authorsModel->setEditStrategy(QSqlTableModel::OnFieldChange);
     bool isSelected1 = authorsModel->select();
+    authorsModel->setHeaderData(1, Qt::Horizontal, "Имя автора");
 
     genresModel = new QSqlTableModel(this, db);
     genresModel->setTable("genres");
     genresModel->setEditStrategy(QSqlTableModel::OnFieldChange);
     bool isSelected2 = genresModel->select();
+    genresModel->setHeaderData(1, Qt::Horizontal, "Жанр");
 
     booksModel = new QSqlRelationalTableModel(this, db);
     booksModel->setTable("books");
     booksModel->setEditStrategy(QSqlTableModel::OnFieldChange);
     bool isSelected3 = booksModel->select();
+    booksModel->setHeaderData(2, Qt::Horizontal, "Книга");
 
     bookGenresModel = new QSqlRelationalTableModel(this, db);
     bookGenresModel->setTable("books_genres");
     bookGenresModel->setEditStrategy(QSqlTableModel::OnFieldChange);
     bool isSelected4 = bookGenresModel->select();
 
+    currentModel = authorsModel;
 
     if (!(isSelected1 && isSelected2 && isSelected3 && isSelected4)){
         qDebug() << "Ошибка выбора одной из моделей";
@@ -75,8 +79,18 @@ bool MainWindow::setUpModels() {
 
 bool MainWindow::setUpTabs() {
     authorsTab = new AuthorsTab(ui->authorsTableView);
+    ui->authorsTableView->setModel(authorsModel);
+    ui->authorsTableView->hideColumn(0);
+
     booksTab = new BooksTab(ui->booksTableView);
+    ui->booksTableView->setModel(booksModel);
+    ui->booksTableView->hideColumn(0);
+    ui->booksTableView->hideColumn(1);
+
     genresTab = new GenresTab(ui->genresTableView);
+    ui->genresTableView->setModel(genresModel);
+    ui->genresTableView->hideColumn(0);
+
     currentTab = authorsTab;
 
     qDebug() << "Вкладки инициализированы успешно!";
@@ -98,12 +112,15 @@ void MainWindow::onTabChange() {
     switch (currentTabIndex) {
         case 0:
             currentTab = authorsTab;
+            currentModel = authorsModel;
             break;
         case 1:
             currentTab = booksTab;
+            currentModel = booksModel;
             break;
         case 2:
             currentTab = genresTab;
+            currentModel = genresModel;
             break;
     }
 
@@ -111,12 +128,26 @@ void MainWindow::onTabChange() {
 
 void MainWindow::onAddBtnClick() {
     bool isOk = currentTab->AddRecord();
+    if (isOk)
+        currentModel->select();
+    else
+        qDebug() << "Ошибка: запись не была добавлена!";
 };
+
 void MainWindow::onEditBtnClick() {
     bool isOk = currentTab->EditRecord();
+    if (isOk)
+        currentModel->select();
+    else
+        qDebug() << "Ошибка: запись не была изменена!";
 };
+
 void MainWindow::onRemoveBtnClick() {
-    return;
+    bool isOk = currentTab->RemoveRecord();
+    if (isOk)
+        currentModel->select();
+    else
+        qDebug() << "Ошибка: запись не была удалена!";
 };
 
 void MainWindow::on_AuthorsTable_customContextMenuRequested(const QPoint &pos)

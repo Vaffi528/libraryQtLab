@@ -12,5 +12,7 @@
 #include <QLineEdit>
 #include <QListWidgetItem>
 #include <QString>
+#include <QModelIndexList>
+#include <QMessageBox>
 
 #endif // HEADERS_H

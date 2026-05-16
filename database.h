@@ -3,17 +3,21 @@
 
 #include "headers.h"
 #include "DialogsData.h"
+#include "CodeStatus.h"
 
 class DataBaseManager {
     public:
         static DataBaseManager* getInstance();
 
     public:
-        bool createTables();
+        Status createTables();
 
-        bool addAuthor(const AuthorsDialogData* data);
-        bool addBook(/* const BooksDialogData* data */);
-        bool assignGenreToBook(/* const GenresDialogData* data */);
+        Status addAuthor(const AuthorsDialogData* data);
+        Status addBook(/* const BooksDialogData* data */);
+        Status assignGenreToBook(/* const GenresDialogData* data */);
+
+        Status editAuthor(const AuthorsDialogData* data);
+        Status editBook(/* const BooksDialogData* data */);
 
     private:
         DataBaseManager() = default;

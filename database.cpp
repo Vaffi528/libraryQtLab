@@ -5,7 +5,7 @@ DataBaseManager* DataBaseManager::getInstance(){
     return &instance;
 }
 
-bool DataBaseManager::createTables() {
+Status DataBaseManager::createTables() {
     QSqlQuery query;
     bool isOk1 = query.exec("CREATE TABLE IF NOT EXISTS authors ("
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -30,20 +30,44 @@ bool DataBaseManager::createTables() {
 
     if (!(isOk1 && isOk2 && isOk3 && isOk4)) {
         qDebug() << "Ошибка при создании таблиц!";
-        return false;
+        return Status::DB_SETUP_FAILED;
     }
     qDebug() << "Таблицы созданы успешно!";
-    return true;
+    return Status::SUCCESS;
 };
 
-bool DataBaseManager::addAuthor(const AuthorsDialogData* data){
+Status DataBaseManager::addAuthor(const AuthorsDialogData* data){
     QSqlQuery query;
+    query.prepare("SELECT id FROM authors WHERE author = :author");
+    query.bindValue(":author", data->name);
+    query.exec();
+    if (query.next()) {
+        return Status::INVALID_ARG;
+    }
     query.prepare("INSERT INTO authors(author) VALUES (:name)");
     query.bindValue(":name", data->name);
     bool isAdded = query.exec();
     if (isAdded)
-        return true;
-    return false;
+        return Status::SUCCESS;
+    return Status::DB_QUERY_FAILED;
 }
-//bool DataBaseManager::addBook(const BooksDialogData* data);
-//bool DataBaseManager::assignGenreToBook(const GenresDialogData* data);
+
+Status DataBaseManager::editAuthor(const AuthorsDialogData* data) {
+    QSqlQuery query;
+    query.prepare("SELECT id FROM authors WHERE author = :author");
+    query.bindValue(":author", data->name);
+    query.exec();
+    if (query.next()) {
+        return Status::INVALID_ARG;
+    }
+    query.prepare("UPDATE authors SET author = :author WHERE id = :id");
+    query.bindValue(":author", data->name);
+    query.bindValue(":id", data->id);
+    bool isAdded = query.exec();
+    if (isAdded)
+        return Status::SUCCESS;
+    return Status::DB_QUERY_FAILED;
+}
+
+//Status DataBaseManager::addBook(const BooksDialogData* data);
+//Status DataBaseManager::assignGenreToBook(const GenresDialogData* data);

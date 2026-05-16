@@ -8,7 +8,7 @@ class AuthorsTab: public AbstractTab {
         AuthorsTab(QTableView* tab): AbstractTab(tab) {};
         virtual ~AuthorsTab() override = default;
         virtual bool AddRecord() override;
-        virtual bool EditRecord() override {};
+        virtual bool EditRecord() override;
         virtual bool RemoveRecord() override {};
 };
 

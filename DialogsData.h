@@ -4,6 +4,7 @@
 #include "headers.h"
 
 struct AuthorsDialogData {
+    int id;
     QString name;
 };
 

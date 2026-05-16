@@ -21,6 +21,7 @@ HEADERS += \
     AuthorsTab.h \
     BookDialog.h \
     BooksTab.h \
+    CodeStatus.h \
     DialogsData.h \
     GenresTab.h \
     database.h \
