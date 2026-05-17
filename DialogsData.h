@@ -8,7 +8,12 @@ struct AuthorsDialogData {
     QString name;
 };
 
-// TODO: BooksDialogData
+struct BooksDialogData {
+    int id;
+    QString name;
+    QString author;
+    QVector<QString> genres;
+};
 
 struct GenresDialogData {
     int id;

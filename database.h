@@ -25,6 +25,8 @@ class DataBaseManager {
         Status removeBook(/* const BooksDialogData* data */);
         Status removeGenre(const GenresDialogData* data);
 
+        QVector<QString> getVectorOf(QString tableType);
+
     private:
         DataBaseManager() = default;
         DataBaseManager(const DataBaseManager&) = delete;

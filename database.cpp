@@ -140,5 +140,17 @@ Status DataBaseManager::removeGenre(const GenresDialogData* data) {
     }
     return Status::DB_QUERY_FAILED;
 }
+
+QVector<QString> DataBaseManager::getVectorOf(QString tableType) {
+    QVector<QString> vector;
+    QSqlQuery query;
+    query.prepare("SELECT " + tableType.chopped(1) + " FROM " + tableType);
+    query.exec();
+    while (query.next()){
+        vector.push_back(query.value(0).toString());
+    }
+    return vector;
+}
+
 //Status DataBaseManager::addBook(const BooksDialogData* data);
 //Status DataBaseManager::assignGenreToBook(const GenresDialogData* data);

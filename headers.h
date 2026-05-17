@@ -10,7 +10,10 @@
 #include <QInputDialog>
 #include <QVBoxLayout>
 #include <QLineEdit>
+#include <QComboBox>
+#include <QPushButton>
 #include <QListWidgetItem>
+#include <QVector>
 #include <QString>
 #include <QModelIndexList>
 #include <QMessageBox>

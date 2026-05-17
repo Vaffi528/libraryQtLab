@@ -12,6 +12,7 @@ CONFIG += c++17
 SOURCES += \
     AuthorsTab.cpp \
     BookDialog.cpp \
+    BooksTab.cpp \
     GenresTab.cpp \
     database.cpp \
     main.cpp \
