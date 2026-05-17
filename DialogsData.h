@@ -8,6 +8,11 @@ struct AuthorsDialogData {
     QString name;
 };
 
-// TODO: BooksDialogData, GenresDialogData
+// TODO: BooksDialogData
+
+struct GenresDialogData {
+    int id;
+    QString name;
+};
 
 #endif // DIALOGDATA_H

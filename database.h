@@ -14,13 +14,16 @@ class DataBaseManager {
 
         Status addAuthor(const AuthorsDialogData* data);
         Status addBook(/* const BooksDialogData* data */);
-        Status assignGenreToBook(/* const GenresDialogData* data */);
+        Status addGenre(const GenresDialogData* data);
+        Status assignGenreToBook(const GenresDialogData* data);
 
         Status editAuthor(const AuthorsDialogData* data);
         Status editBook(/* const BooksDialogData* data */);
+        Status editGenre(const GenresDialogData* data);
 
         Status removeAuthor(const AuthorsDialogData* data);
         Status removeBook(/* const BooksDialogData* data */);
+        Status removeGenre(const GenresDialogData* data);
 
     private:
         DataBaseManager() = default;

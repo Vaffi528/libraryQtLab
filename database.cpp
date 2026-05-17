@@ -36,6 +36,7 @@ Status DataBaseManager::createTables() {
     return Status::SUCCESS;
 };
 
+//AUTHORS
 Status DataBaseManager::addAuthor(const AuthorsDialogData* data){
     if (data->name.isEmpty())
         return Status::INVALID_ARG;
@@ -78,6 +79,59 @@ Status DataBaseManager::removeAuthor(const AuthorsDialogData* data) {
     query.exec();
     if (query.next()){
         query.prepare("DELETE FROM authors WHERE id = :id");
+        query.bindValue(":id", data->id);
+        bool isDeleted = query.exec();
+        if (isDeleted)
+            return Status::SUCCESS;
+        return Status::DB_QUERY_FAILED;
+    }
+    return Status::DB_QUERY_FAILED;
+}
+
+
+// GENRES
+Status DataBaseManager::addGenre(const GenresDialogData* data){
+    if (data->name.isEmpty())
+        return Status::INVALID_ARG;
+    QSqlQuery query;
+    query.prepare("SELECT id FROM genres WHERE genre = :genre");
+    query.bindValue(":genre", data->name);
+    query.exec();
+    if (query.next()) {
+        return Status::INVALID_ARG;
+    }
+    query.prepare("INSERT INTO genres(genre) VALUES (:genre)");
+    query.bindValue(":genre", data->name);
+    bool isAdded = query.exec();
+    if (isAdded)
+        return Status::SUCCESS;
+    return Status::DB_QUERY_FAILED;
+}
+
+Status DataBaseManager::editGenre(const GenresDialogData* data) {
+    QSqlQuery query;
+    query.prepare("SELECT id FROM genres WHERE genre = :genre");
+    query.bindValue(":genre", data->name);
+    query.exec();
+    if (query.next()) {
+        return Status::INVALID_ARG;
+    }
+    query.prepare("UPDATE genres SET genre = :genre WHERE id = :id");
+    query.bindValue(":genre", data->name);
+    query.bindValue(":id", data->id);
+    bool isAdded = query.exec();
+    if (isAdded)
+        return Status::SUCCESS;
+    return Status::DB_QUERY_FAILED;
+}
+
+Status DataBaseManager::removeGenre(const GenresDialogData* data) {
+    QSqlQuery query;
+    query.prepare("SELECT genre FROM genres WHERE id = :id");
+    query.bindValue(":id", data->id);
+    query.exec();
+    if (query.next()){
+        query.prepare("DELETE FROM genres WHERE id = :id");
         query.bindValue(":id", data->id);
         bool isDeleted = query.exec();
         if (isDeleted)
