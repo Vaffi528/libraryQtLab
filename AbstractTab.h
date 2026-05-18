@@ -11,9 +11,9 @@ class AbstractTab: public QDialog {
         virtual ~AbstractTab() {};
 
     public:
-        virtual bool AddRecord() = 0;
-        virtual bool EditRecord() = 0;
-        virtual bool RemoveRecord() = 0;
+        virtual Status AddRecord() = 0;
+        virtual Status EditRecord() = 0;
+        virtual Status RemoveRecord() = 0;
 
     public:
         QTableView* tab;

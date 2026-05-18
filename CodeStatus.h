@@ -6,6 +6,7 @@ enum class Status {
     DB_QUERY_FAILED,
     INVALID_ARG,
     DB_SETUP_FAILED,
+    REJECT,
 };
 
 #endif // CODESTATUS_H

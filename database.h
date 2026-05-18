@@ -5,6 +5,8 @@
 #include "DialogsData.h"
 #include "CodeStatus.h"
 
+
+// TODO: зарефакторить
 class DataBaseManager {
     public:
         static DataBaseManager* getInstance();
@@ -13,9 +15,9 @@ class DataBaseManager {
         Status createTables();
 
         Status addAuthor(const AuthorsDialogData* data);
-        Status addBook(/* const BooksDialogData* data */);
+        Status addBook(const BooksDialogData* data);
         Status addGenre(const GenresDialogData* data);
-        Status assignGenreToBook(const GenresDialogData* data);
+        Status assignGenreToBook(const QVector<QString>& genres, int bookId);
 
         Status editAuthor(const AuthorsDialogData* data);
         Status editBook(/* const BooksDialogData* data */);
@@ -24,6 +26,11 @@ class DataBaseManager {
         Status removeAuthor(const AuthorsDialogData* data);
         Status removeBook(/* const BooksDialogData* data */);
         Status removeGenre(const GenresDialogData* data);
+
+        QString getAuthorById(int id);
+        QVector<QString> getGenresByBookId(bool* ok, int id);
+        QString getGenreById(int id);
+        int getBookIdByBookName(QString name);
 
         QVector<QString> getVectorOf(QString tableType);
 

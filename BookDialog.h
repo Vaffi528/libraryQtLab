@@ -9,9 +9,11 @@ class BookDialog : public QDialog{
     Q_OBJECT
 
     public:
-        explicit BookDialog(QWidget* parent = nullptr);
-        static BooksDialogData getBook(bool* ok, QWidget* parent = nullptr);
-        void setUpWidgets();
+        explicit BookDialog(QWidget* parent = nullptr, BooksDialogData* book = nullptr);
+        static BooksDialogData getBook(bool* ok, QWidget* parent = nullptr, BooksDialogData* book = nullptr);
+        void setUpWidgets(BooksDialogData* book = nullptr);
+        void setUpPlainWidgets();
+        void setUpListWidgets(BooksDialogData* book = nullptr);
 
     private slots:
         void onOkBtnClicked();
@@ -22,6 +24,7 @@ class BookDialog : public QDialog{
         QComboBox* authorCombo;
         QListWidget* genresList;
         QPushButton* okBtn;
+        QPushButton* cancelBtn;
 };
 
 #endif // BOOKDIALOG_H

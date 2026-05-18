@@ -33,6 +33,7 @@ private slots:
     void onAddBtnClick();
     void onEditBtnClick();
     void onRemoveBtnClick();
+    void updateModels();
 
 private:
     Ui::MainWindow *ui;

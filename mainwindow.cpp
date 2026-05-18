@@ -126,27 +126,33 @@ void MainWindow::onTabChange() {
 
 };
 
+void MainWindow::updateModels() {
+    authorsModel->select();
+    booksModel->select();
+    genresModel->select();
+}
+
 void MainWindow::onAddBtnClick() {
-    bool isOk = currentTab->AddRecord();
-    if (isOk)
-        currentModel->select();
-    else
+    Status isOk = currentTab->AddRecord();
+    if (isOk == Status::SUCCESS)
+        updateModels();
+    else if (isOk == Status::DB_QUERY_FAILED)
         qDebug() << "Ошибка: запись не была добавлена!";
 };
 
 void MainWindow::onEditBtnClick() {
-    bool isOk = currentTab->EditRecord();
-    if (isOk)
-        currentModel->select();
-    else
+    Status isOk = currentTab->EditRecord();
+    if (isOk == Status::SUCCESS)
+        updateModels();
+    else if (isOk == Status::DB_QUERY_FAILED)
         qDebug() << "Ошибка: запись не была изменена!";
 };
 
 void MainWindow::onRemoveBtnClick() {
-    bool isOk = currentTab->RemoveRecord();
-    if (isOk)
-        currentModel->select();
-    else
+    Status isOk = currentTab->RemoveRecord();
+    if (isOk == Status::SUCCESS)
+        updateModels();
+    else if (isOk == Status::DB_QUERY_FAILED)
         qDebug() << "Ошибка: запись не была удалена!";
 };
 

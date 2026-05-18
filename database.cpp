@@ -32,6 +32,7 @@ Status DataBaseManager::createTables() {
         qDebug() << "Ошибка при создании таблиц!";
         return Status::DB_SETUP_FAILED;
     }
+
     qDebug() << "Таблицы созданы успешно!";
     return Status::SUCCESS;
 };
@@ -74,6 +75,7 @@ Status DataBaseManager::editAuthor(const AuthorsDialogData* data) {
 
 Status DataBaseManager::removeAuthor(const AuthorsDialogData* data) {
     QSqlQuery query;
+    query.exec("PRAGMA foreign_keys = ON;");
     query.prepare("SELECT author FROM authors WHERE id = :id");
     query.bindValue(":id", data->id);
     query.exec();
@@ -127,6 +129,7 @@ Status DataBaseManager::editGenre(const GenresDialogData* data) {
 
 Status DataBaseManager::removeGenre(const GenresDialogData* data) {
     QSqlQuery query;
+    query.exec("PRAGMA foreign_keys = ON;");
     query.prepare("SELECT genre FROM genres WHERE id = :id");
     query.bindValue(":id", data->id);
     query.exec();
@@ -144,6 +147,7 @@ Status DataBaseManager::removeGenre(const GenresDialogData* data) {
 QVector<QString> DataBaseManager::getVectorOf(QString tableType) {
     QVector<QString> vector;
     QSqlQuery query;
+
     query.prepare("SELECT " + tableType.chopped(1) + " FROM " + tableType);
     query.exec();
     while (query.next()){
@@ -152,5 +156,96 @@ QVector<QString> DataBaseManager::getVectorOf(QString tableType) {
     return vector;
 }
 
-//Status DataBaseManager::addBook(const BooksDialogData* data);
-//Status DataBaseManager::assignGenreToBook(const GenresDialogData* data);
+// BOOKS
+Status DataBaseManager::addBook(const BooksDialogData* data){
+    QSqlQuery query;
+
+    int existingBookId = getBookIdByBookName(data->name);
+    if (existingBookId != -1)
+        return Status::INVALID_ARG;
+
+    query.prepare("INSERT INTO books (author_id, book) VALUES ((SELECT id FROM authors WHERE author = :author), :book)");
+    query.bindValue(":author", data->author);
+    query.bindValue(":book", data->name);
+    bool isInserted = query.exec();
+
+    if (!isInserted)
+        return Status::DB_QUERY_FAILED;
+
+    int bookId = query.lastInsertId().toInt();
+
+    return assignGenreToBook(data->genres, bookId);
+
+}
+
+Status DataBaseManager::assignGenreToBook(const QVector<QString>& genres, int bookId){
+    QSqlQuery query;
+    QString request = "INSERT INTO books_genres (book_id, genre_id) VALUES ";
+
+    for (const QString& genre : genres) {
+        request += "(?, (SELECT id FROM genres WHERE genre = ?)), ";
+    }
+
+    query.prepare(request.chopped(2));
+
+    int placeholderIndex = 0;
+    for (const QString& genre : genres) {
+        query.bindValue(placeholderIndex++, bookId);
+        query.bindValue(placeholderIndex++, genre);
+    }
+
+    bool isInserted = query.exec();
+    if (isInserted)
+        return Status::SUCCESS;
+    return Status::DB_QUERY_FAILED;
+}
+// TODO: переименовать
+QString DataBaseManager::getAuthorById(int id) {
+    QSqlQuery query;
+    query.prepare("SELECT author FROM authors WHERE id = :id");
+    query.bindValue(":id", id);
+    bool isOk = query.exec();
+    if (!isOk)
+        return QString();
+    if (query.next()){
+        return query.value(0).toString();
+    }
+    return QString();
+
+}
+// TODO: переименовать
+QVector<QString> DataBaseManager::getGenresByBookId(bool* ok, int id) {
+    QSqlQuery query;
+    query.prepare("SELECT genre_id FROM books_genres WHERE book_id = :id");
+    query.bindValue(":id", id);
+    *ok = query.exec();
+    if (!*ok)
+        return QVector<QString>();
+
+    QVector<QString> genres;
+    while (query.next()){
+        genres.push_back(getGenreById(query.value(0).toInt()));
+    }
+    return genres;
+}
+// TODO: переименовать
+QString DataBaseManager::getGenreById(int id) {
+    QSqlQuery query;
+    query.prepare("SELECT genre FROM genres WHERE id = :id");
+    query.bindValue(":id", id);
+    query.exec();
+    if (query.next())
+        return query.value(0).toString();
+    return QString();
+}
+
+int DataBaseManager::getBookIdByBookName(QString name) {
+    QSqlQuery query;
+    query.prepare("SELECT id FROM books WHERE book = :book");
+    query.bindValue(":book", name);
+    query.exec();
+    if (query.next())
+        return query.value(0).toInt();
+    return -1;
+}
+
