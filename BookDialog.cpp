@@ -22,8 +22,13 @@ BookDialog::BookDialog (QWidget* parent, BooksDialogData* book): QDialog(parent)
 
 void BookDialog::setUpWidgets(BooksDialogData* book) {
     setUpPlainWidgets();
-    if (book)
-        bookEdit->setText(book->author);
+
+    if (book) {
+        this->book.id = book->id;
+        bookEdit->setText(book->name);
+    } else
+        this->book.id = 0;
+
     setUpListWidgets(book);
 }
 
@@ -50,6 +55,7 @@ void BookDialog::setUpListWidgets(BooksDialogData* book) {
                 item->setCheckState(Qt::Checked);
             else
                 item->setCheckState(Qt::Unchecked);
+            authorCombo->setCurrentText(book->author);
         }
     } else {
         for (int i = 0; i < genresList->count(); ++i) {
@@ -71,7 +77,6 @@ void BookDialog::onOkBtnClicked() {
         return;
     }
 
-    book.id = 0;
     book.name = bookEdit->text();
     book.author = authorCombo->currentText();
 
@@ -80,11 +85,6 @@ void BookDialog::onOkBtnClicked() {
         if (item->checkState() == Qt::Checked) {
             book.genres.append(item->text());
         }
-    }
-
-    if (book.genres.isEmpty()) {
-        QMessageBox::information(this, "Пустой список", "Похоже, Вы не выбрали жанр для книги");
-        return;
     }
 
     accept();

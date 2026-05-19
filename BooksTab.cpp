@@ -22,7 +22,6 @@ Status BooksTab::AddRecord() {
 }
 
 Status BooksTab::EditRecord() {
-    bool isDialogOk;
     QModelIndex selected = tab->currentIndex();
     if (!selected.isValid()){
         QMessageBox::information(this, "Изменить запись", "Выберите запись для изменения");
@@ -32,7 +31,7 @@ Status BooksTab::EditRecord() {
     int row = selected.row();
     int pk = tab->model()->index(row,0).data().toInt();
     int authorId = tab->model()->index(row,1).data().toInt();
-    QString bookName = tab->model()->index(row,1).data().toString();
+    QString bookName = tab->model()->index(row,2).data().toString();
 
     BooksDialogData book;
     book.id = pk;
@@ -53,6 +52,40 @@ Status BooksTab::EditRecord() {
         return Status::REJECT;
     }
 
-    // TODO: доделать метод
+    Status DBResponse = DataBaseManager::getInstance()->editBook(&newBook);
+    if (DBResponse == Status::SUCCESS) {
+        qDebug() << "Книга успешно изменена!";
+        return Status::SUCCESS;
+    } else if (DBResponse == Status::INVALID_ARG) {
+        QMessageBox::information(this, "Изменить запись", "Такое имя уже существует!");
+        qDebug() << "Ошибка: было введено уже существующее имя!";
+        return Status::INVALID_ARG;
+    }
 
+    QMessageBox::information(this, "Изменить запись", "Ошибка базы данных при изменении книги");
+    qDebug() << "Ошибка базы данных при изменении книги!";
+    return Status::DB_QUERY_FAILED;
+
+}
+
+Status BooksTab::RemoveRecord() {
+    QModelIndexList selectedItems = tab->selectionModel()->selectedIndexes();
+    for (QModelIndex& selected : selectedItems){
+        int row = selected.row();
+        QModelIndex bookId = tab->model()->index(row,0);
+        BooksDialogData book {bookId.data().toInt(), QString(), QString(), QVector<QString>()};
+        Status DBResponse = DataBaseManager::getInstance()->removeBook(&book);
+        if (DBResponse == Status::DB_QUERY_FAILED) {
+            QMessageBox::information(this, "Удалить запись", "Ошибка базы данных при удалении книги");
+            qDebug() << "Ошибка базы данных при удалении книги!";
+            return Status::DB_QUERY_FAILED;
+        }
+    }
+    if (selectedItems.isEmpty()) {
+        QMessageBox::information(this, "Удалить запись", "Выберите запись для удаления");
+        qDebug() << "Ошибка: не была выбрана строка для удаления!";
+        return Status::INVALID_ARG;
+    }
+    qDebug() << "Книги успешно удалены из БД!";
+    return Status::SUCCESS;
 }

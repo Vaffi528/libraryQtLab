@@ -17,14 +17,19 @@ class DataBaseManager {
         Status addAuthor(const AuthorsDialogData* data);
         Status addBook(const BooksDialogData* data);
         Status addGenre(const GenresDialogData* data);
-        Status assignGenreToBook(const QVector<QString>& genres, int bookId);
+
+        Status assignGenreToBook(const BooksDialogData* data);
+        Status updateGenreToBookTable(const BooksDialogData* data);
+
+        Status deleteGenreToBookConnectionByIds(int bookId, int genreId);
+        Status addGenreToBookConnectionByIds(int bookId, int genreId);
 
         Status editAuthor(const AuthorsDialogData* data);
-        Status editBook(/* const BooksDialogData* data */);
+        Status editBook(const BooksDialogData* data);
         Status editGenre(const GenresDialogData* data);
 
         Status removeAuthor(const AuthorsDialogData* data);
-        Status removeBook(/* const BooksDialogData* data */);
+        Status removeBook(const BooksDialogData* data);
         Status removeGenre(const GenresDialogData* data);
 
         QString getAuthorById(int id);

@@ -9,7 +9,7 @@ Status DataBaseManager::createTables() {
     QSqlQuery query;
     bool isOk1 = query.exec("CREATE TABLE IF NOT EXISTS authors ("
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-               "author TEXT NOT NULL)");
+               "author TEXT NOT NULL UNIQUE)");
 
     bool isOk2 = query.exec("CREATE TABLE IF NOT EXISTS books ("
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -19,7 +19,7 @@ Status DataBaseManager::createTables() {
 
     bool isOk3 = query.exec("CREATE TABLE IF NOT EXISTS genres ("
                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-               "genre TEXT NOT NULL)");
+               "genre TEXT NOT NULL UNIQUE)");
 
     bool isOk4 = query.exec("CREATE TABLE IF NOT EXISTS books_genres ("
                "book_id INTEGER NOT NULL, "
@@ -75,7 +75,7 @@ Status DataBaseManager::editAuthor(const AuthorsDialogData* data) {
 
 Status DataBaseManager::removeAuthor(const AuthorsDialogData* data) {
     QSqlQuery query;
-    query.exec("PRAGMA foreign_keys = ON;");
+    query.exec("PRAGMA foreign_keys = ON");
     query.prepare("SELECT author FROM authors WHERE id = :id");
     query.bindValue(":id", data->id);
     query.exec();
@@ -129,7 +129,7 @@ Status DataBaseManager::editGenre(const GenresDialogData* data) {
 
 Status DataBaseManager::removeGenre(const GenresDialogData* data) {
     QSqlQuery query;
-    query.exec("PRAGMA foreign_keys = ON;");
+    query.exec("PRAGMA foreign_keys = ON");
     query.prepare("SELECT genre FROM genres WHERE id = :id");
     query.bindValue(":id", data->id);
     query.exec();
@@ -174,23 +174,67 @@ Status DataBaseManager::addBook(const BooksDialogData* data){
 
     int bookId = query.lastInsertId().toInt();
 
-    return assignGenreToBook(data->genres, bookId);
+    BooksDialogData bookCopy;
+
+    bookCopy = *data;
+    bookCopy.id = bookId;
+
+    return assignGenreToBook(&bookCopy);
 
 }
 
-Status DataBaseManager::assignGenreToBook(const QVector<QString>& genres, int bookId){
+Status DataBaseManager::editBook(const BooksDialogData* data){
+    QSqlQuery query;
+
+    int existingBookId = getBookIdByBookName(data->name);
+    if (existingBookId != -1 && existingBookId != data->id)
+        return Status::INVALID_ARG;
+
+    query.prepare("UPDATE books SET author_id = (SELECT id FROM authors WHERE author = :author), book = :book WHERE id = :id");
+    query.bindValue(":author", data->author);
+    query.bindValue(":book", data->name);
+    query.bindValue(":id", data->id);
+    bool isInserted = query.exec();
+
+    if (!isInserted)
+        return Status::DB_QUERY_FAILED;
+
+    return updateGenreToBookTable(data);
+}
+
+Status DataBaseManager::removeBook(const BooksDialogData* data) {
+    QSqlQuery query;
+    query.exec("PRAGMA foreign_keys = ON");
+    query.prepare("SELECT book FROM books WHERE id = :id");
+    query.bindValue(":id", data->id);
+    query.exec();
+    if (query.next()){
+        query.prepare("DELETE FROM books WHERE id = :id");
+        query.bindValue(":id", data->id);
+        bool isDeleted = query.exec();
+        if (isDeleted)
+            return Status::SUCCESS;
+        return Status::DB_QUERY_FAILED;
+    }
+    return Status::DB_QUERY_FAILED;
+}
+
+Status DataBaseManager::assignGenreToBook(const BooksDialogData* data){
+    if (data->genres.isEmpty())
+        return Status::SUCCESS;
+
     QSqlQuery query;
     QString request = "INSERT INTO books_genres (book_id, genre_id) VALUES ";
 
-    for (const QString& genre : genres) {
+    for (const QString& genre : data->genres) {
         request += "(?, (SELECT id FROM genres WHERE genre = ?)), ";
     }
 
     query.prepare(request.chopped(2));
 
     int placeholderIndex = 0;
-    for (const QString& genre : genres) {
-        query.bindValue(placeholderIndex++, bookId);
+    for (const QString& genre : data->genres) {
+        query.bindValue(placeholderIndex++, data->id);
         query.bindValue(placeholderIndex++, genre);
     }
 
@@ -199,6 +243,72 @@ Status DataBaseManager::assignGenreToBook(const QVector<QString>& genres, int bo
         return Status::SUCCESS;
     return Status::DB_QUERY_FAILED;
 }
+
+Status DataBaseManager::updateGenreToBookTable(const BooksDialogData* data){
+    QSqlQuery query;
+    int bookId = data->id;
+    QVector<QString> genresCopy = data->genres;
+
+    // сразу проверка пересечения множества genresCopy и множества жанров до изменения
+    query.prepare("SELECT genre_id FROM books_genres WHERE book_id = :book_id");
+    query.bindValue(":book_id", bookId);
+    query.exec();
+
+    while(query.next()){
+        int genreId = query.value(0).toInt();
+        QString genre = getGenreById(genreId);
+        if (genresCopy.contains(genre)){
+            genresCopy.removeAll(genre);
+        } else {
+            deleteGenreToBookConnectionByIds(bookId, genreId);
+        }
+    }
+
+    // далее добавление элементов разности множества genresCopy и множества жанров до изменения
+    for (const QString& genre : genresCopy) {
+        query.prepare("SELECT id FROM genres WHERE genre = :genre");
+        query.bindValue(":genre", genre);
+
+        bool isFound = query.exec();
+        if (!isFound)
+            return Status::DB_QUERY_FAILED;
+
+        if (!query.next()) {
+            qDebug() << "Предупреждение: в БД не оказалось жарна" << genre;
+            continue;
+        }
+
+        int genreId = query.value(0).toInt();
+        Status status = addGenreToBookConnectionByIds(bookId, genreId);
+        if (status != Status::SUCCESS){
+            return Status::DB_QUERY_FAILED;
+        }
+    }
+
+    return Status::SUCCESS;
+}
+
+Status DataBaseManager::deleteGenreToBookConnectionByIds(int bookId, int genreId){
+    QSqlQuery query;
+    query.prepare("DELETE FROM books_genres WHERE book_id = :book_id AND genre_id = :genre_id");
+    query.bindValue(":book_id", bookId);
+    query.bindValue(":genre_id", genreId);
+    bool isDeleted = query.exec();
+    if (isDeleted)
+        return Status::SUCCESS;
+    return Status::DB_QUERY_FAILED;
+}
+Status DataBaseManager::addGenreToBookConnectionByIds(int bookId, int genreId) {
+    QSqlQuery query;
+    query.prepare("INSERT INTO books_genres (book_id, genre_id) VALUES (:book_id, :genre_id)");
+    query.bindValue(":book_id", bookId);
+    query.bindValue(":genre_id", genreId);
+    bool isAdded = query.exec();
+    if (isAdded)
+        return Status::SUCCESS;
+    return Status::DB_QUERY_FAILED;
+}
+
 // TODO: переименовать
 QString DataBaseManager::getAuthorById(int id) {
     QSqlQuery query;

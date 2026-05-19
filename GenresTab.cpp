@@ -84,4 +84,4 @@ Status GenresTab::RemoveRecord() {
     }
     qDebug() << "Жанры успешно удалены из БД!";
     return Status::SUCCESS;
-    }
+}

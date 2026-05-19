@@ -80,4 +80,4 @@ Status AuthorsTab::RemoveRecord() {
     }
     qDebug() << "Авторы успешно удалены из БД!";
     return Status::SUCCESS;
-    }
+}

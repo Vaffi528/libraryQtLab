@@ -10,7 +10,7 @@ class BooksTab: public AbstractTab {
         virtual ~BooksTab() override = default;
         virtual Status AddRecord() override;
         virtual Status EditRecord() override;
-        virtual Status RemoveRecord() override {};
+        virtual Status RemoveRecord() override;
 };
 
 #endif // BOOKSTAB_H
