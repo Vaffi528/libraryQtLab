@@ -39,6 +39,9 @@ bool MainWindow::setUpDatabase() {
         qDebug() << "Ошибка открытия базы данных:" << db.lastError().text();
         return false;
     }
+    QSqlQuery query;
+    query.exec("PRAGMA foreign_keys = ON");
+
     qDebug() << "БД открыта успешно!";
     return true;
 }
@@ -59,8 +62,10 @@ bool MainWindow::setUpModels() {
     booksModel = new QSqlRelationalTableModel(this, db);
     booksModel->setTable("books");
     booksModel->setEditStrategy(QSqlTableModel::OnFieldChange);
-    bool isSelected3 = booksModel->select();
+    booksModel->setHeaderData(1, Qt::Horizontal, "Имя автора книги");
     booksModel->setHeaderData(2, Qt::Horizontal, "Книга");
+    booksModel->setRelation(1, QSqlRelation("authors", "id", "author"));
+    bool isSelected3 = booksModel->select();
 
     bookGenresModel = new QSqlRelationalTableModel(this, db);
     bookGenresModel->setTable("books_genres");
@@ -81,15 +86,17 @@ bool MainWindow::setUpTabs() {
     authorsTab = new AuthorsTab(ui->authorsTableView);
     ui->authorsTableView->setModel(authorsModel);
     ui->authorsTableView->hideColumn(0);
+    ui->authorsTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     booksTab = new BooksTab(ui->booksTableView);
     ui->booksTableView->setModel(booksModel);
     ui->booksTableView->hideColumn(0);
-    ui->booksTableView->hideColumn(1);
+    ui->booksTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     genresTab = new GenresTab(ui->genresTableView);
     ui->genresTableView->setModel(genresModel);
     ui->genresTableView->hideColumn(0);
+    ui->genresTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     currentTab = authorsTab;
 
@@ -155,9 +162,4 @@ void MainWindow::onRemoveBtnClick() {
     else if (isOk == Status::DB_QUERY_FAILED)
         qDebug() << "Ошибка: запись не была удалена!";
 };
-
-void MainWindow::on_AuthorsTable_customContextMenuRequested(const QPoint &pos)
-{
-
-}
 

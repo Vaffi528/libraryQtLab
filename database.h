@@ -32,10 +32,13 @@ class DataBaseManager {
         Status removeBook(const BooksDialogData* data);
         Status removeGenre(const GenresDialogData* data);
 
+        // TODO: вместо этих методов сделать пару гибких методов с QVariant
         QString getAuthorById(int id);
         QVector<QString> getGenresByBookId(bool* ok, int id);
         QString getGenreById(int id);
         int getBookIdByBookName(QString name);
+        int getBookIdByAuthorId(int id);
+        int getAuthorIdByBookId(int id);
 
         QVector<QString> getVectorOf(QString tableType);
 

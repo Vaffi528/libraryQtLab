@@ -23,6 +23,8 @@ Status BooksTab::AddRecord() {
 
 Status BooksTab::EditRecord() {
     QModelIndex selected = tab->currentIndex();
+    DataBaseManager* manager = DataBaseManager::getInstance();
+
     if (!selected.isValid()){
         QMessageBox::information(this, "Изменить запись", "Выберите запись для изменения");
         qDebug() << "Ошибка: не была выбрана строка для изменения!";
@@ -30,7 +32,8 @@ Status BooksTab::EditRecord() {
     }
     int row = selected.row();
     int pk = tab->model()->index(row,0).data().toInt();
-    int authorId = tab->model()->index(row,1).data().toInt();
+    int authorId = manager->getAuthorIdByBookId(pk);
+
     QString bookName = tab->model()->index(row,2).data().toString();
 
     BooksDialogData book;
@@ -38,8 +41,8 @@ Status BooksTab::EditRecord() {
     book.name = bookName;
 
     bool isGenresGot;
-    book.author = DataBaseManager::getInstance()->getAuthorById(authorId);
-    book.genres = DataBaseManager::getInstance()->getGenresByBookId(&isGenresGot, pk);
+    book.author = manager->getAuthorById(authorId);
+    book.genres = manager->getGenresByBookId(&isGenresGot, pk);
 
     if (!isGenresGot){
         qDebug() << "Ошибка базы данных при изменении книги!";

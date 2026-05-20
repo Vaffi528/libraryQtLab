@@ -64,8 +64,22 @@ Status AuthorsTab::RemoveRecord() {
     QModelIndexList selectedItems = tab->selectionModel()->selectedIndexes();
     for (QModelIndex& selected : selectedItems){
         int row = selected.row();
-        QModelIndex userId = tab->model()->index(row,0);
-        AuthorsDialogData author {userId.data().toInt(), tab->model()->index(row,0).data().toString()};
+        int authorId = tab->model()->index(row,0).data().toInt();
+        QString authorName = tab->model()->index(row,1).data().toString();
+
+        int bookId = DataBaseManager::getInstance()->getBookIdByAuthorId(authorId);
+
+        if (bookId != -1) {
+            QMessageBox::StandardButton questionStatus;
+            questionStatus = QMessageBox::question(this, "Подтверждение", "В базе сущестуют книги данного автрова " + authorName + "."
+                                                                    " Его удаление приведет к удалению данных книг. "
+                                                                    "Вы уверены, что хотите продолжить?",
+                                          QMessageBox::Ok | QMessageBox::Cancel);
+            if (questionStatus == QMessageBox::Cancel)
+                continue;
+        }
+
+        AuthorsDialogData author {authorId, authorName};
         Status DBResponse = DataBaseManager::getInstance()->removeAuthor(&author);
         if (DBResponse == Status::DB_QUERY_FAILED) {
             QMessageBox::information(this, "Удалить запись", "Ошибка базы данных при удалении автора");

@@ -28,7 +28,6 @@ public:
     void initSubscriptions();
 
 private slots:
-    void on_AuthorsTable_customContextMenuRequested(const QPoint &pos);
     void onTabChange();
     void onAddBtnClick();
     void onEditBtnClick();

@@ -69,7 +69,7 @@ Status GenresTab::RemoveRecord() {
     for (QModelIndex& selected : selectedItems){
         int row = selected.row();
         QModelIndex genreId = tab->model()->index(row,0);
-        GenresDialogData genre {genreId.data().toInt(), tab->model()->index(row,0).data().toString()};
+        GenresDialogData genre {genreId.data().toInt(), tab->model()->index(row,1).data().toString()};
         Status DBResponse = DataBaseManager::getInstance()->removeGenre(&genre);
         if (DBResponse == Status::DB_QUERY_FAILED) {
             QMessageBox::information(this, "Удалить запись", "Ошибка базы данных при удалении жанра");

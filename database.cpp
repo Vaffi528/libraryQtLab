@@ -75,7 +75,6 @@ Status DataBaseManager::editAuthor(const AuthorsDialogData* data) {
 
 Status DataBaseManager::removeAuthor(const AuthorsDialogData* data) {
     QSqlQuery query;
-    query.exec("PRAGMA foreign_keys = ON");
     query.prepare("SELECT author FROM authors WHERE id = :id");
     query.bindValue(":id", data->id);
     query.exec();
@@ -129,7 +128,6 @@ Status DataBaseManager::editGenre(const GenresDialogData* data) {
 
 Status DataBaseManager::removeGenre(const GenresDialogData* data) {
     QSqlQuery query;
-    query.exec("PRAGMA foreign_keys = ON");
     query.prepare("SELECT genre FROM genres WHERE id = :id");
     query.bindValue(":id", data->id);
     query.exec();
@@ -204,7 +202,7 @@ Status DataBaseManager::editBook(const BooksDialogData* data){
 
 Status DataBaseManager::removeBook(const BooksDialogData* data) {
     QSqlQuery query;
-    query.exec("PRAGMA foreign_keys = ON");
+
     query.prepare("SELECT book FROM books WHERE id = :id");
     query.bindValue(":id", data->id);
     query.exec();
@@ -323,6 +321,21 @@ QString DataBaseManager::getAuthorById(int id) {
     return QString();
 
 }
+
+int DataBaseManager::getAuthorIdByBookId(int id) {
+    QSqlQuery query;
+    query.prepare("SELECT author_id FROM books WHERE id = :id");
+    query.bindValue(":id", id);
+    bool isOk = query.exec();
+    if (!isOk)
+        return 0;
+    if (query.next()){
+        return query.value(0).toInt();
+    }
+    return 0;
+
+}
+
 // TODO: переименовать
 QVector<QString> DataBaseManager::getGenresByBookId(bool* ok, int id) {
     QSqlQuery query;
@@ -359,3 +372,12 @@ int DataBaseManager::getBookIdByBookName(QString name) {
     return -1;
 }
 
+int DataBaseManager::getBookIdByAuthorId(int id){
+    QSqlQuery query;
+    query.prepare("SELECT id FROM books WHERE author_id = :author_id");
+    query.bindValue(":author_id", id);
+    query.exec();
+    if (query.next())
+        return query.value(0).toInt();
+    return -1;
+}
