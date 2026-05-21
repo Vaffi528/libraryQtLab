@@ -3,7 +3,6 @@
 
 #include "AbstractTab.h"
 
-// TODO: зарефакторить + добавить надкласс PlainDataTab
 class AuthorsTab: public AbstractTab {
     public:
         AuthorsTab(QTableView* tab): AbstractTab(tab) {};

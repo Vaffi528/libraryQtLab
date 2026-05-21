@@ -3,7 +3,6 @@
 
 #include "AbstractTab.h"
 
-// TODO: зарефакторить + добавить надкласс PlainDataTab
 class GenresTab: public AbstractTab {
     public:
         GenresTab(QTableView* tab): AbstractTab(tab) {};
@@ -11,7 +10,6 @@ class GenresTab: public AbstractTab {
         virtual Status AddRecord() override;
         virtual Status EditRecord() override;
         virtual Status RemoveRecord() override;
-
 };
 
 #endif // GENRESTAB_H

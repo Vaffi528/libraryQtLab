@@ -33,14 +33,26 @@ class DataBaseManager {
         Status removeGenre(const GenresDialogData* data);
 
         // TODO: вместо этих методов сделать пару гибких методов с QVariant
-        QString getAuthorById(int id);
-        QVector<QString> getGenresByBookId(bool* ok, int id);
-        QString getGenreById(int id);
+        QVector<QString> getGenresNamesByBookId(bool* ok, int id);
+        QString getAuthorNameByAuthorId(int id);
+        QString getGenreNameByGenreId(int id);
+        QString getBookNameByBookId(int id);
+
         int getBookIdByBookName(QString name);
         int getBookIdByAuthorId(int id);
         int getAuthorIdByBookId(int id);
 
+        int getGenreIdByGenreName(QString name);
+        int getAuthorIdByAuthorName(QString name);
+
         QVector<QString> getVectorOf(QString tableType);
+
+    private:
+        Status addPlainRecord(const QString& name, QString tableName);
+        Status editPlainRecord(const QString& name, int id, QString tableName);
+        Status removePlainRecord(int id, QString tableName);
+        int getIdByX(QString name, QString tableName);
+        QString getXById(int id, QString tableName);
 
     private:
         DataBaseManager() = default;

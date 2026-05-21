@@ -41,8 +41,8 @@ Status BooksTab::EditRecord() {
     book.name = bookName;
 
     bool isGenresGot;
-    book.author = manager->getAuthorById(authorId);
-    book.genres = manager->getGenresByBookId(&isGenresGot, pk);
+    book.author = manager->getAuthorNameByAuthorId(authorId);
+    book.genres = manager->getGenresNamesByBookId(&isGenresGot, pk);
 
     if (!isGenresGot){
         qDebug() << "Ошибка базы данных при изменении книги!";

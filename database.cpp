@@ -37,109 +37,101 @@ Status DataBaseManager::createTables() {
     return Status::SUCCESS;
 };
 
-//AUTHORS
-Status DataBaseManager::addAuthor(const AuthorsDialogData* data){
-    if (data->name.isEmpty())
+// GENERAL METHODS
+Status DataBaseManager::addPlainRecord(const QString& name, QString tableName) {
+    if (name.isEmpty())
         return Status::INVALID_ARG;
+
+    int id = getIdByX(name, tableName);
+    if (id != -1)
+        return Status::INVALID_ARG;
+
     QSqlQuery query;
-    query.prepare("SELECT id FROM authors WHERE author = :author");
-    query.bindValue(":author", data->name);
-    query.exec();
-    if (query.next()) {
-        return Status::INVALID_ARG;
-    }
-    query.prepare("INSERT INTO authors(author) VALUES (:name)");
-    query.bindValue(":name", data->name);
+    query.prepare("INSERT INTO " + tableName + "(" + tableName.chopped(1) + ") VALUES (:name)");
+    query.bindValue(":name", name);
     bool isAdded = query.exec();
     if (isAdded)
         return Status::SUCCESS;
     return Status::DB_QUERY_FAILED;
 }
 
-Status DataBaseManager::editAuthor(const AuthorsDialogData* data) {
-    QSqlQuery query;
-    query.prepare("SELECT id FROM authors WHERE author = :author");
-    query.bindValue(":author", data->name);
-    query.exec();
-    if (query.next()) {
+Status DataBaseManager::editPlainRecord(const QString& name, int id, QString tableName) {
+    if (name.isEmpty())
         return Status::INVALID_ARG;
-    }
-    query.prepare("UPDATE authors SET author = :author WHERE id = :id");
-    query.bindValue(":author", data->name);
-    query.bindValue(":id", data->id);
+
+    int existingId = getIdByX(name, tableName);
+    if (existingId != -1)
+        return Status::INVALID_ARG;
+
+    QSqlQuery query;
+    query.prepare("UPDATE " + tableName + " SET " + tableName.chopped(1) + " = :name WHERE id = :id");
+    query.bindValue(":name", name);
+    query.bindValue(":id", id);
     bool isAdded = query.exec();
     if (isAdded)
         return Status::SUCCESS;
     return Status::DB_QUERY_FAILED;
 }
 
-Status DataBaseManager::removeAuthor(const AuthorsDialogData* data) {
-    QSqlQuery query;
-    query.prepare("SELECT author FROM authors WHERE id = :id");
-    query.bindValue(":id", data->id);
-    query.exec();
-    if (query.next()){
-        query.prepare("DELETE FROM authors WHERE id = :id");
-        query.bindValue(":id", data->id);
+Status DataBaseManager::removePlainRecord(int id, QString tableName) {
+    QString name = getXById(id, tableName);
+    if (!name.isEmpty()){
+        QSqlQuery query;
+        query.prepare("DELETE FROM " + tableName + " WHERE id = :id");
+        query.bindValue(":id", id);
         bool isDeleted = query.exec();
         if (isDeleted)
             return Status::SUCCESS;
         return Status::DB_QUERY_FAILED;
     }
     return Status::DB_QUERY_FAILED;
+}
+
+int DataBaseManager::getIdByX(QString name, QString tableName) {
+    QSqlQuery query;
+    query.prepare("SELECT id FROM " + tableName + " WHERE " + tableName.chopped(1) + " = :X");
+    query.bindValue(":X", name);
+    query.exec();
+    if (query.next())
+        return query.value(0).toInt();
+    return -1;
+}
+
+QString DataBaseManager::getXById(int id, QString tableName) {
+    QSqlQuery query;
+    query.prepare("SELECT " + tableName.chopped(1) + " FROM " + tableName + " WHERE id = :id");
+    query.bindValue(":id", id);
+    query.exec();
+    if (query.next())
+        return query.value(0).toString();
+    return QString();
+}
+
+//AUTHORS
+Status DataBaseManager::addAuthor(const AuthorsDialogData* data){
+    return addPlainRecord(data->name, "authors");
+}
+
+Status DataBaseManager::editAuthor(const AuthorsDialogData* data) {
+    return editPlainRecord(data->name, data->id, "authors");
+}
+
+Status DataBaseManager::removeAuthor(const AuthorsDialogData* data) {
+    return removePlainRecord(data->id, "authors");
 }
 
 
 // GENRES
 Status DataBaseManager::addGenre(const GenresDialogData* data){
-    if (data->name.isEmpty())
-        return Status::INVALID_ARG;
-    QSqlQuery query;
-    query.prepare("SELECT id FROM genres WHERE genre = :genre");
-    query.bindValue(":genre", data->name);
-    query.exec();
-    if (query.next()) {
-        return Status::INVALID_ARG;
-    }
-    query.prepare("INSERT INTO genres(genre) VALUES (:genre)");
-    query.bindValue(":genre", data->name);
-    bool isAdded = query.exec();
-    if (isAdded)
-        return Status::SUCCESS;
-    return Status::DB_QUERY_FAILED;
+    return addPlainRecord(data->name, "genres");
 }
 
 Status DataBaseManager::editGenre(const GenresDialogData* data) {
-    QSqlQuery query;
-    query.prepare("SELECT id FROM genres WHERE genre = :genre");
-    query.bindValue(":genre", data->name);
-    query.exec();
-    if (query.next()) {
-        return Status::INVALID_ARG;
-    }
-    query.prepare("UPDATE genres SET genre = :genre WHERE id = :id");
-    query.bindValue(":genre", data->name);
-    query.bindValue(":id", data->id);
-    bool isAdded = query.exec();
-    if (isAdded)
-        return Status::SUCCESS;
-    return Status::DB_QUERY_FAILED;
+    return editPlainRecord(data->name, data->id, "genres");
 }
 
 Status DataBaseManager::removeGenre(const GenresDialogData* data) {
-    QSqlQuery query;
-    query.prepare("SELECT genre FROM genres WHERE id = :id");
-    query.bindValue(":id", data->id);
-    query.exec();
-    if (query.next()){
-        query.prepare("DELETE FROM genres WHERE id = :id");
-        query.bindValue(":id", data->id);
-        bool isDeleted = query.exec();
-        if (isDeleted)
-            return Status::SUCCESS;
-        return Status::DB_QUERY_FAILED;
-    }
-    return Status::DB_QUERY_FAILED;
+    return removePlainRecord(data->id, "genres");
 }
 
 QVector<QString> DataBaseManager::getVectorOf(QString tableType) {
@@ -201,20 +193,7 @@ Status DataBaseManager::editBook(const BooksDialogData* data){
 }
 
 Status DataBaseManager::removeBook(const BooksDialogData* data) {
-    QSqlQuery query;
-
-    query.prepare("SELECT book FROM books WHERE id = :id");
-    query.bindValue(":id", data->id);
-    query.exec();
-    if (query.next()){
-        query.prepare("DELETE FROM books WHERE id = :id");
-        query.bindValue(":id", data->id);
-        bool isDeleted = query.exec();
-        if (isDeleted)
-            return Status::SUCCESS;
-        return Status::DB_QUERY_FAILED;
-    }
-    return Status::DB_QUERY_FAILED;
+    return removePlainRecord(data->id, "books");
 }
 
 Status DataBaseManager::assignGenreToBook(const BooksDialogData* data){
@@ -254,7 +233,7 @@ Status DataBaseManager::updateGenreToBookTable(const BooksDialogData* data){
 
     while(query.next()){
         int genreId = query.value(0).toInt();
-        QString genre = getGenreById(genreId);
+        QString genre = getGenreNameByGenreId(genreId);
         if (genresCopy.contains(genre)){
             genresCopy.removeAll(genre);
         } else {
@@ -264,19 +243,13 @@ Status DataBaseManager::updateGenreToBookTable(const BooksDialogData* data){
 
     // далее добавление элементов разности множества genresCopy и множества жанров до изменения
     for (const QString& genre : genresCopy) {
-        query.prepare("SELECT id FROM genres WHERE genre = :genre");
-        query.bindValue(":genre", genre);
+        int genreId = getGenreIdByGenreName(genre);
 
-        bool isFound = query.exec();
-        if (!isFound)
-            return Status::DB_QUERY_FAILED;
-
-        if (!query.next()) {
+        if (genreId == -1) {
             qDebug() << "Предупреждение: в БД не оказалось жарна" << genre;
             continue;
         }
 
-        int genreId = query.value(0).toInt();
         Status status = addGenreToBookConnectionByIds(bookId, genreId);
         if (status != Status::SUCCESS){
             return Status::DB_QUERY_FAILED;
@@ -308,18 +281,8 @@ Status DataBaseManager::addGenreToBookConnectionByIds(int bookId, int genreId) {
 }
 
 // TODO: переименовать
-QString DataBaseManager::getAuthorById(int id) {
-    QSqlQuery query;
-    query.prepare("SELECT author FROM authors WHERE id = :id");
-    query.bindValue(":id", id);
-    bool isOk = query.exec();
-    if (!isOk)
-        return QString();
-    if (query.next()){
-        return query.value(0).toString();
-    }
-    return QString();
-
+QString DataBaseManager::getAuthorNameByAuthorId(int id) {
+    return getXById(id, "authors");
 }
 
 int DataBaseManager::getAuthorIdByBookId(int id) {
@@ -336,8 +299,7 @@ int DataBaseManager::getAuthorIdByBookId(int id) {
 
 }
 
-// TODO: переименовать
-QVector<QString> DataBaseManager::getGenresByBookId(bool* ok, int id) {
+QVector<QString> DataBaseManager::getGenresNamesByBookId(bool* ok, int id) {
     QSqlQuery query;
     query.prepare("SELECT genre_id FROM books_genres WHERE book_id = :id");
     query.bindValue(":id", id);
@@ -347,29 +309,21 @@ QVector<QString> DataBaseManager::getGenresByBookId(bool* ok, int id) {
 
     QVector<QString> genres;
     while (query.next()){
-        genres.push_back(getGenreById(query.value(0).toInt()));
+        genres.push_back(getGenreNameByGenreId(query.value(0).toInt()));
     }
     return genres;
 }
-// TODO: переименовать
-QString DataBaseManager::getGenreById(int id) {
-    QSqlQuery query;
-    query.prepare("SELECT genre FROM genres WHERE id = :id");
-    query.bindValue(":id", id);
-    query.exec();
-    if (query.next())
-        return query.value(0).toString();
-    return QString();
+
+QString DataBaseManager::getBookNameByBookId(int id) {
+    return getXById(id, "books");
+}
+
+QString DataBaseManager::getGenreNameByGenreId(int id) {
+    return getXById(id, "genres");
 }
 
 int DataBaseManager::getBookIdByBookName(QString name) {
-    QSqlQuery query;
-    query.prepare("SELECT id FROM books WHERE book = :book");
-    query.bindValue(":book", name);
-    query.exec();
-    if (query.next())
-        return query.value(0).toInt();
-    return -1;
+    return getIdByX(name, "books");
 }
 
 int DataBaseManager::getBookIdByAuthorId(int id){
@@ -381,3 +335,13 @@ int DataBaseManager::getBookIdByAuthorId(int id){
         return query.value(0).toInt();
     return -1;
 }
+
+int DataBaseManager::getAuthorIdByAuthorName(QString name) {
+    return getIdByX(name, "authors");
+}
+
+int DataBaseManager::getGenreIdByGenreName(QString name) {
+    return getIdByX(name, "genres");
+}
+
+

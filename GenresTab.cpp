@@ -41,7 +41,7 @@ Status GenresTab::EditRecord() {
     int row = selected.row();
     QModelIndex col1Cell = tab->model()->index(row,1);
     QModelIndex col0Cell = tab->model()->index(row,0);
-    QString genresName = QInputDialog::getText(this, "Add Record",
+    QString genresName = QInputDialog::getText(this, "Edit Record",
                                                 "Input genre:", QLineEdit::Normal, col1Cell.data().toString(), &isDialogOk);
 
     if (!isDialogOk) {
@@ -52,7 +52,7 @@ Status GenresTab::EditRecord() {
     GenresDialogData genre {col0Cell.data().toInt(), genresName};
     Status DBResponse = DataBaseManager::getInstance()->editGenre(&genre);
     if (DBResponse == Status::SUCCESS) {
-        qDebug() << "Жанр успешно добавлен в БД!";
+        qDebug() << "Жанр успешно изменен в БД!";
         return Status::SUCCESS;
     } else if (DBResponse == Status::INVALID_ARG) {
         QMessageBox::information(this, "Изменить запись", "Такой жанр уже существует!");

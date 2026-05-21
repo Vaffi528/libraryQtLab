@@ -1,17 +1,18 @@
-#include "AuthorsTab.h"
+#include "PlainDataTab.h"
 
-Status AuthorsTab::AddRecord() {
+
+Status PlainDataTab::AddRecord(QString tabName) {
     bool isDialogOk;
-    QString authorsName = QInputDialog::getText(this, "Add Record",
-    "Input author:", QLineEdit::Normal, "", &isDialogOk);
+    QString objectsName = QInputDialog::getText(this, "Add Record",
+                                                "Input author:", QLineEdit::Normal, "", &isDialogOk);
 
     if (!isDialogOk) {
         qDebug() << "Отмена диалога при добавления автора";
         return Status::REJECT;
     }
 
-    AuthorsDialogData author {0, authorsName};
-    Status DBResponse = DataBaseManager::getInstance()->addAuthor(&author);
+    PlainDialogData object {0, objectsName};
+    Status DBResponse = DataBaseManager::getInstance()->addPlain(&object);
     if (DBResponse == Status::SUCCESS) {
         qDebug() << "Автор успешно добавлен в БД!";
         return Status::SUCCESS;
@@ -26,7 +27,7 @@ Status AuthorsTab::AddRecord() {
 
 }
 
-Status AuthorsTab::EditRecord() {
+Status PlainDataTab::EditRecord(QString tabName) {
     bool isDialogOk;
     QModelIndex selected = tab->currentIndex();
     if (!selected.isValid()){
@@ -37,7 +38,7 @@ Status AuthorsTab::EditRecord() {
     int row = selected.row();
     QModelIndex col1Cell = tab->model()->index(row,1);
     QModelIndex col0Cell = tab->model()->index(row,0);
-    QString authorsName = QInputDialog::getText(this, "Edit Record",
+    QString authorsName = QInputDialog::getText(this, "Add Record",
                                                 "Input author:", QLineEdit::Normal, col1Cell.data().toString(), &isDialogOk);
 
     if (!isDialogOk) {
@@ -48,7 +49,7 @@ Status AuthorsTab::EditRecord() {
     AuthorsDialogData author {col0Cell.data().toInt(), authorsName};
     Status DBResponse = DataBaseManager::getInstance()->editAuthor(&author);
     if (DBResponse == Status::SUCCESS) {
-        qDebug() << "Автор успешно изменен в БД!";
+        qDebug() << "Автор успешно добавлен в БД!";
         return Status::SUCCESS;
     } else if (DBResponse == Status::INVALID_ARG) {
         QMessageBox::information(this, "Изменить запись", "Такое имя уже существует!");
@@ -60,7 +61,7 @@ Status AuthorsTab::EditRecord() {
     return Status::DB_QUERY_FAILED;
 }
 
-Status AuthorsTab::RemoveRecord() {
+Status PlainDataTab::RemoveRecord(QString tabName) {
     QModelIndexList selectedItems = tab->selectionModel()->selectedIndexes();
     for (QModelIndex& selected : selectedItems){
         int row = selected.row();
@@ -72,9 +73,9 @@ Status AuthorsTab::RemoveRecord() {
         if (bookId != -1) {
             QMessageBox::StandardButton questionStatus;
             questionStatus = QMessageBox::question(this, "Подтверждение", "В базе сущестуют книги данного автрова " + authorName + "."
-                                                                    " Его удаление приведет к удалению данных книг. "
-                                                                    "Вы уверены, что хотите продолжить?",
-                                          QMessageBox::Ok | QMessageBox::Cancel);
+                                                                                                                                   " Его удаление приведет к удалению данных книг. "
+                                                                                                                                   "Вы уверены, что хотите продолжить?",
+                                                   QMessageBox::Ok | QMessageBox::Cancel);
             if (questionStatus == QMessageBox::Cancel)
                 continue;
         }
